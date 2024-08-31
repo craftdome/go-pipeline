@@ -1,4 +1,4 @@
-package go_pipeline
+package pipeline
 
 import (
 	"context"
@@ -17,7 +17,7 @@ type Unit[I, O any] struct {
 	sharedStates []State
 
 	OnExecute func(I) (O, error)
-	OnError   func(error)
+	OnError   func(error, I)
 
 	StartedAt time.Time
 	EndedAt   time.Time
@@ -126,7 +126,7 @@ func (u *Unit[I, O]) execute(worker int, i I) {
 
 	if o, err := u.OnExecute(i); err != nil {
 		u.sharedStates[worker].Errors.Add(1)
-		u.OnError(err)
+		u.OnError(err, i)
 	} else {
 		u.sharedStates[worker].Done.Add(1)
 

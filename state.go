@@ -1,4 +1,4 @@
-package go_pipeline
+package pipeline
 
 import (
 	"fmt"

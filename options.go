@@ -1,4 +1,4 @@
-package go_pipeline
+package pipeline
 
 type Option[I, O any] func(p *Unit[I, O])
 
