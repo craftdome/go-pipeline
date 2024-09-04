@@ -18,6 +18,7 @@ func (e ErrorData[I]) Error() string {
 
 type NextUnit[I any] interface {
 	Input() chan<- I
+	Stop(context.Context) error
 }
 
 type Unit[I, O any] struct {
@@ -123,6 +124,9 @@ func (u *Unit[I, O]) Stop(ctx context.Context) error {
 	case <-ctx.Done():
 		return ctx.Err()
 	case <-u.doneChannel:
+		if u.HasNextUnit() {
+			return u.nextUnit.Stop(ctx)
+		}
 		return nil
 	}
 }

@@ -48,13 +48,8 @@ func main() {
 		// Stopping the units with timeout context
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
-		// stopping 1st unit...
+		// stopping units chain...
 		if err := unit.Stop(ctx); err != nil {
-			done <- err
-			return
-		}
-		// stopping 2nd unit...
-		if err := unit2.Stop(ctx); err != nil {
 			done <- err
 			return
 		}
