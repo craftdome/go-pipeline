@@ -18,6 +18,7 @@ func (e ErrorData[I]) Error() string {
 
 type NextUnit[I any] interface {
 	Input() chan<- I
+	Start() error
 	Stop(context.Context) error
 }
 
@@ -109,7 +110,7 @@ func (u *Unit[I, O]) Start() error {
 	}()
 
 	if u.HasNextUnit() {
-		return u.Start()
+		return u.nextUnit.Start()
 	}
 	return nil
 }

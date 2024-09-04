@@ -34,7 +34,9 @@ func main() {
 	// Connecting unit to unit2
 	unit.SetNextUnit(unit2)
 
-	unit.Start()
+	if err := unit.Start(); err != nil {
+		log.Fatalln(err)
+	}
 
 	// Generating some data
 	var stopped bool
