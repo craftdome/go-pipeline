@@ -22,8 +22,8 @@ type UserInventory struct {
 
 func main() {
 	// Initializing a unit
-	unit := go_pipeline.NewUnit[User, UserInventory](
-		go_pipeline.WithWorkers[User, UserInventory](32),
+	unit := pipeline.NewUnit[User, UserInventory](
+		pipeline.WithWorkers[User, UserInventory](32),
 	)
 
 	// Set OnExecute action to the unit
@@ -37,14 +37,10 @@ func main() {
 		}, nil
 	}
 
-	// Set OnError action to the unit
-	unit.OnError = func(err error) {
-		// error handling...
-		log.Println(err)
-	}
-
 	// Start the unit to reading input chan
-	unit.Start()
+	if err := unit.Start(); err != nil {
+		log.Fatalf("%v", err)
+	}
 
 	// Generating some data
 	var stopped bool
@@ -64,6 +60,13 @@ func main() {
 	go func() {
 		for output := range unit.Output() {
 			log.Printf("%#v", output)
+		}
+	}()
+
+	// Getting errors
+	go func() {
+		for err := range unit.Errors() {
+			log.Printf("%v", err)
 		}
 	}()
 

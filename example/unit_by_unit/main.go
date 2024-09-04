@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	unit := go_pipeline.NewUnit[string, string]()
+	unit := pipeline.NewUnit[string, string]()
 	unit.OnExecute = func(s string) (string, error) {
 		// imitating a long processing...
 		time.Sleep(time.Duration(rand.Intn(5)) * time.Second)
@@ -22,7 +22,7 @@ func main() {
 		return strings.ToUpper(s), nil
 	}
 
-	unit2 := go_pipeline.NewUnit[string, int]()
+	unit2 := pipeline.NewUnit[string, int]()
 	unit2.OnExecute = func(s string) (int, error) {
 		// imitating a long processing...
 		time.Sleep(time.Duration(rand.Intn(5)) * time.Second)
