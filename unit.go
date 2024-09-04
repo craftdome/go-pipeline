@@ -60,15 +60,15 @@ func (u *Unit[I, O]) Output() <-chan O {
 	return u.outputChannel
 }
 
-func (u *Unit[I, O]) Start() {
+func (u *Unit[I, O]) Start() error {
 	if u.OnExecute == nil {
-		panic("OnExecute() method must be set before Start() invokes.")
+		return ErrExecuteMethodNotSet
 	}
 	if !u.EndedAt.IsZero() {
-		panic("You cannot start the unit after stopping.")
+		return ErrUnitDoneAlready
 	}
 	if !u.StartedAt.IsZero() {
-		panic("The unit already started.")
+		return ErrUnitStartedAlready
 	}
 
 	u.StartedAt = time.Now()
@@ -91,14 +91,16 @@ func (u *Unit[I, O]) Start() {
 		u.doneChannel <- struct{}{}
 		u.EndedAt = time.Now()
 	}()
+
+	return nil
 }
 
 func (u *Unit[I, O]) Stop(ctx context.Context) error {
 	if u.StartedAt.IsZero() {
-		panic("You must start the unit first.")
+		return ErrUnitNotStarted
 	}
 	if !u.EndedAt.IsZero() {
-		panic("The unit already stopped.")
+		return ErrUnitStoppedAlready
 	}
 
 	close(u.inputChannel)
