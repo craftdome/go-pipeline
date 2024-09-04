@@ -108,6 +108,9 @@ func (u *Unit[I, O]) Start() error {
 		u.EndedAt = time.Now()
 	}()
 
+	if u.HasNextUnit() {
+		return u.Start()
+	}
 	return nil
 }
 

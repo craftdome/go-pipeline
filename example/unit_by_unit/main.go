@@ -35,7 +35,6 @@ func main() {
 	unit.SetNextUnit(unit2)
 
 	unit.Start()
-	unit2.Start()
 
 	// Generating some data
 	var stopped bool
