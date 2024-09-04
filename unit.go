@@ -103,7 +103,9 @@ func (u *Unit[I, O]) Start() error {
 
 	go func() {
 		wg.Wait()
-		close(u.outputChannel)
+		if !u.HasNextUnit() {
+			close(u.outputChannel)
+		}
 		close(u.errorsChannel)
 		u.doneChannel <- struct{}{}
 		u.EndedAt = time.Now()
