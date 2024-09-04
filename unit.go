@@ -51,6 +51,7 @@ func NewUnit[I, O any](opts ...Option[I, O]) *Unit[I, O] {
 
 	u.sharedStates = make([]State, u.workers)
 	u.outputChannel = make(chan O, u.workers)
+	u.errorsChannel = make(chan ErrorData[I], u.workers)
 
 	return u
 }
