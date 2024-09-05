@@ -37,11 +37,6 @@ func main() {
 		}, nil
 	}
 
-	// Start the unit to reading input chan
-	if err := unit.Start(); err != nil {
-		log.Fatalf("%v", err)
-	}
-
 	// Generating some data
 	var stopped bool
 	done := make(chan error)
@@ -63,12 +58,15 @@ func main() {
 		}
 	}()
 
-	// Getting errors
-	go func() {
-		for err := range unit.Errors() {
-			log.Printf("%v", err)
-		}
-	}()
+	// Handle errors
+	unit.OnError = func(err error, user User) {
+		log.Printf("%v: %v", err, user)
+	}
+
+	// Start the unit to reading input chan
+	if err := unit.Start(); err != nil {
+		log.Fatalf("%v", err)
+	}
 
 	// Graceful shutdown
 	interrupt := make(chan os.Signal)

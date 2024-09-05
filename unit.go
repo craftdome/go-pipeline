@@ -7,15 +7,6 @@ import (
 	"time"
 )
 
-type ErrorData[I any] struct {
-	Err  error
-	Data I
-}
-
-func (e ErrorData[I]) Error() string {
-	return e.Err.Error()
-}
-
 type NextUnit[I any] interface {
 	Input() chan<- I
 	Start() error
@@ -28,13 +19,13 @@ type Unit[I, O any] struct {
 	sharedStates []State
 
 	OnExecute func(I) (O, error)
+	OnError   func(error, I)
 
 	StartedAt time.Time
 	EndedAt   time.Time
 
 	inputChannel  chan I
 	outputChannel chan O
-	errorsChannel chan ErrorData[I]
 	doneChannel   chan struct{}
 
 	nextUnit NextUnit[O]
@@ -53,7 +44,6 @@ func NewUnit[I, O any](opts ...Option[I, O]) *Unit[I, O] {
 
 	u.sharedStates = make([]State, u.workers)
 	u.outputChannel = make(chan O, u.workers)
-	u.errorsChannel = make(chan ErrorData[I], u.workers)
 
 	return u
 }
@@ -70,10 +60,6 @@ func (u *Unit[I, O]) Output() <-chan O {
 		panic("Next unit has been defined. You cannot use this output.")
 	}
 	return u.outputChannel
-}
-
-func (u *Unit[I, O]) Errors() <-chan ErrorData[I] {
-	return u.errorsChannel
 }
 
 func (u *Unit[I, O]) Start() error {
@@ -106,7 +92,6 @@ func (u *Unit[I, O]) Start() error {
 		if !u.HasNextUnit() {
 			close(u.outputChannel)
 		}
-		close(u.errorsChannel)
 		u.doneChannel <- struct{}{}
 		u.EndedAt = time.Now()
 	}()
@@ -153,9 +138,8 @@ func (u *Unit[I, O]) execute(worker int, i I) {
 
 	if o, err := u.OnExecute(i); err != nil {
 		u.sharedStates[worker].Errors.Add(1)
-		u.errorsChannel <- ErrorData[I]{
-			Err:  err,
-			Data: i,
+		if u.OnError != nil {
+			u.OnError(err, i)
 		}
 	} else {
 		u.sharedStates[worker].Done.Add(1)
