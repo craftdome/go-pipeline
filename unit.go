@@ -10,7 +10,7 @@ import (
 type NextUnit[I any] interface {
 	Input() chan<- I
 	Start() error
-	Stop(context.Context) error
+	Close(context.Context) error
 }
 
 type Unit[I, O any] struct {
@@ -102,7 +102,7 @@ func (u *Unit[I, O]) Start() error {
 	return nil
 }
 
-func (u *Unit[I, O]) Stop(ctx context.Context) error {
+func (u *Unit[I, O]) Close(ctx context.Context) error {
 	if u.StartedAt.IsZero() {
 		return ErrUnitNotStarted
 	}
@@ -116,7 +116,7 @@ func (u *Unit[I, O]) Stop(ctx context.Context) error {
 		return ctx.Err()
 	case <-u.doneChannel:
 		if u.HasNextUnit() {
-			return u.nextUnit.Stop(ctx)
+			return u.nextUnit.Close(ctx)
 		}
 		return nil
 	}

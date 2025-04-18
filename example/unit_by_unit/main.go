@@ -50,7 +50,7 @@ func main() {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 		// stopping units chain...
-		if err := unit.Stop(ctx); err != nil {
+		if err := unit.Close(ctx); err != nil {
 			done <- err
 			return
 		}

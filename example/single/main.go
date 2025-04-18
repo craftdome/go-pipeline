@@ -48,7 +48,7 @@ func main() {
 		// Stopping the unit with timeout context
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
-		done <- unit.Stop(ctx)
+		done <- unit.Close(ctx)
 	}()
 
 	// Getting results
