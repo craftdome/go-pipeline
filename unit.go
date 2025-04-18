@@ -33,9 +33,10 @@ type Unit[I, O any] struct {
 
 func NewUnit[I, O any](opts ...Option[I, O]) *Unit[I, O] {
 	u := &Unit[I, O]{
-		workers:      runtime.NumCPU(),
-		inputChannel: make(chan I),
-		doneChannel:  make(chan struct{}, 1),
+		workers:       runtime.NumCPU(),
+		inputChannel:  make(chan I),
+		outputChannel: make(chan O),
+		doneChannel:   make(chan struct{}),
 	}
 
 	for _, opt := range opts {
@@ -43,7 +44,6 @@ func NewUnit[I, O any](opts ...Option[I, O]) *Unit[I, O] {
 	}
 
 	u.sharedStates = make([]State, u.workers)
-	u.outputChannel = make(chan O, u.workers)
 
 	return u
 }
